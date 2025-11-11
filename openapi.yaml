@@ -6,8 +6,8 @@ info:
   contact:
     name: Karapetyan Victoria
 servers:
-  - url: https://ваш-домен.railway.app
-    description: Production server
+  - url: http://localhost:4010
+    description: Mock server for testing
 paths:
   /api/songs:
     get:
