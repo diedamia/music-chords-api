@@ -1,0 +1,27 @@
+{
+  "name": "prac_5",
+  "version": "1.0.0",
+  "description": "Web-based reference for storing and viewing chords and lyrics",
+  "keywords": [
+    "music",
+    "songs",
+    "chords"
+  ],
+  "author": "Karapetyan Victoria",
+  "license": "ISC",
+  "main": "index.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "dependencies": {
+    "body-parser": "^2.2.0",
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.3",
+    "express": "^5.1.0",
+    "mongoose": "^8.19.3"
+  }
+}

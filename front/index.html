@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Справочник песен с аккордами</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Справочник песен с аккордами</h1>
+        
+        <!-- Форма добавления песни -->
+        <div class="form-section">
+            <h2>Добавить новую песню</h2>
+            <form id="addSongForm">
+                <input type="text" id="title" placeholder="Название песни" required>
+                <input type="text" id="artist" placeholder="Исполнитель" required>
+                <textarea id="lyrics" placeholder="Текст песни" required></textarea>
+                <textarea id="chords" placeholder="Аккорды (через пробел)" required></textarea>
+                <select id="difficulty">
+                    <option value="beginner">Начальный</option>
+                    <option value="intermediate">Средний</option>
+                    <option value="advanced">Продвинутый</option>
+                </select>
+                <button type="submit">Добавить песню</button>
+            </form>
+        </div>
+
+        <!-- Поиск -->
+        <div class="search-section">
+            <h2>Поиск песен</h2>
+            <input type="text" id="searchInput" placeholder="Поиск по названию, исполнителю или тексту...">
+            <button onclick="searchSongs()">Найти</button>
+            <button onclick="loadAllSongs()">Показать все</button>
+        </div>
+
+        <!-- Список песен -->
+        <div class="songs-section">
+            <h2>Список песен</h2>
+            <div id="songsList"></div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
