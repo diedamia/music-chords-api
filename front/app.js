@@ -144,6 +144,17 @@ function switchToEditMode(songId) {
     // Обновить внешний вид кнопки
     submitButton.textContent = 'Обновить песню';
     submitButton.style.backgroundColor = '#2196F3';
+    scrollToForm();
+}
+
+function scrollToForm() {
+    const formSection = document.querySelector('.form-section');
+    if (formSection) {
+        formSection.scrollIntoView({ 
+            behavior: 'smooth',
+            block: 'start'
+        });
+    }
 }
 
 // Обработчик обновления песни
