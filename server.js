@@ -30,6 +30,11 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'front', 'index.html'));
 });
 
+// Документация
+app.get('/docs', (req, res) => {
+  res.sendFile(path.join(__dirname, 'documentation.html'));
+});
+
 // Запуск сервера после подключения к базе
 mongoose.connection.once('open', () => {
   app.listen(PORT, () => {

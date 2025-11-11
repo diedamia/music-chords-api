@@ -1,16 +1,30 @@
-// Загрузить все песни при загрузке страницы
-document.addEventListener('DOMContentLoaded', loadAllSongs);
+// DOM элементы
+const addSongForm = document.getElementById('addSongForm');
+const titleInput = document.getElementById('title');
+const artistInput = document.getElementById('artist');
+const lyricsInput = document.getElementById('lyrics');
+const chordsInput = document.getElementById('chords');
+const difficultySelect = document.getElementById('difficulty');
+const searchInput = document.getElementById('searchInput');
+const songsList = document.getElementById('songsList');
+const submitButton = document.querySelector('#addSongForm button[type="submit"]');
 
-// Обработчик формы добавления песни
-document.getElementById('addSongForm').addEventListener('submit', async function(e) {
+// Состояние приложения
+let appState = {
+    currentEditId: null,
+    isEditMode: false
+};
+
+// Оригинальный обработчик формы для создания песен
+const originalFormHandler = async function(e) {
     e.preventDefault();
     
     const songData = {
-        title: document.getElementById('title').value,
-        artist: document.getElementById('artist').value,
-        lyrics: document.getElementById('lyrics').value,
-        chords: document.getElementById('chords').value,
-        difficulty: document.getElementById('difficulty').value
+        title: titleInput.value,
+        artist: artistInput.value,
+        lyrics: lyricsInput.value,
+        chords: chordsInput.value,
+        difficulty: difficultySelect.value
     };
 
     try {
@@ -24,7 +38,7 @@ document.getElementById('addSongForm').addEventListener('submit', async function
 
         if (response.ok) {
             alert('Песня добавлена!');
-            this.reset();
+            resetFormToCreateMode();
             loadAllSongs();
         } else {
             alert('Ошибка при добавлении песни');
@@ -33,9 +47,15 @@ document.getElementById('addSongForm').addEventListener('submit', async function
         console.error('Error:', error);
         alert('Ошибка при добавлении песни');
     }
+};
+
+// Инициализация приложения
+document.addEventListener('DOMContentLoaded', function() {
+    addSongForm.addEventListener('submit', originalFormHandler);
+    loadAllSongs();
 });
 
-// Загрузить все песни
+// Загрузка всех песен
 async function loadAllSongs() {
     try {
         const response = await fetch('/api/songs');
@@ -48,7 +68,7 @@ async function loadAllSongs() {
 
 // Поиск песен
 async function searchSongs() {
-    const query = document.getElementById('searchInput').value;
+    const query = searchInput.value;
     if (!query) {
         loadAllSongs();
         return;
@@ -63,10 +83,8 @@ async function searchSongs() {
     }
 }
 
-// Отобразить песни
+// Отображение списка песен
 function displaySongs(songs) {
-    const songsList = document.getElementById('songsList');
-    
     if (songs.length === 0) {
         songsList.innerHTML = '<p>Песни не найдены</p>';
         return;
@@ -80,13 +98,94 @@ function displaySongs(songs) {
             <div class="song-chords">Аккорды: ${song.chords}</div>
             <div class="song-lyrics">${song.lyrics}</div>
             <div align="right">
-            <button class="delete-btn" onclick="deleteSong('${song._id}')">Удалить</button>
+                <button class="edit-btn" onclick="enableEditMode('${song._id}')">Редактировать</button>
+                <button class="delete-btn" onclick="deleteSong('${song._id}')">Удалить</button>
             </div>
         </div>
     `).join('');
 }
 
-// Удалить песню
+// Активация режима редактирования
+async function enableEditMode(songId) {
+    try {
+        const response = await fetch(`/api/songs/${songId}`);
+        const song = await response.json();
+        
+        if (response.ok) {
+            fillFormWithSongData(song);
+            switchToEditMode(songId);
+        } else {
+            alert('Ошибка при загрузке данных песни');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Ошибка при загрузке данных песни');
+    }
+}
+
+// Заполнение формы данными песни
+function fillFormWithSongData(song) {
+    titleInput.value = song.title;
+    artistInput.value = song.artist;
+    lyricsInput.value = song.lyrics;
+    chordsInput.value = song.chords;
+    difficultySelect.value = song.difficulty;
+}
+
+// Переключение в режим редактирования
+function switchToEditMode(songId) {
+    appState.currentEditId = songId;
+    appState.isEditMode = true;
+    
+    // Удалить старый обработчик и добавить новый
+    addSongForm.removeEventListener('submit', originalFormHandler);
+    addSongForm.addEventListener('submit', handleSongUpdate);
+    
+    // Обновить внешний вид кнопки
+    submitButton.textContent = 'Обновить песню';
+    submitButton.style.backgroundColor = '#2196F3';
+}
+
+// Обработчик обновления песни
+async function handleSongUpdate(e) {
+    e.preventDefault();
+    
+    if (!appState.isEditMode || !appState.currentEditId) {
+        alert('Режим редактирования не активирован');
+        return;
+    }
+
+    const songData = {
+        title: titleInput.value,
+        artist: artistInput.value,
+        lyrics: lyricsInput.value,
+        chords: chordsInput.value,
+        difficulty: difficultySelect.value
+    };
+
+    try {
+        const response = await fetch(`/api/songs/${appState.currentEditId}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(songData)
+        });
+
+        if (response.ok) {
+            alert('Песня обновлена!');
+            resetFormToCreateMode();
+            loadAllSongs();
+        } else {
+            alert('Ошибка при обновлении песни');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Ошибка при обновлении песни');
+    }
+}
+
+// Удаление песни
 async function deleteSong(songId) {
     if (!confirm('Удалить эту песню?')) return;
 
@@ -107,12 +206,29 @@ async function deleteSong(songId) {
     }
 }
 
-// Текст сложности
+// Сброс формы в режим создания
+function resetFormToCreateMode() {
+    addSongForm.reset();
+    
+    // Сброс состояния приложения
+    appState.currentEditId = null;
+    appState.isEditMode = false;
+    
+    // Восстановление оригинального обработчика
+    addSongForm.removeEventListener('submit', handleSongUpdate);
+    addSongForm.addEventListener('submit', originalFormHandler);
+    
+    // Восстановление внешнего вида кнопки
+    submitButton.textContent = 'Добавить песню';
+    submitButton.style.backgroundColor = '#4CAF50';
+}
+
+// Получение текстового описания сложности
 function getDifficultyText(difficulty) {
-    const levels = {
+    const difficultyLevels = {
         'beginner': 'Начальный',
         'intermediate': 'Средний', 
         'advanced': 'Продвинутый'
     };
-    return levels[difficulty] || difficulty;
+    return difficultyLevels[difficulty] || difficulty;
 }
