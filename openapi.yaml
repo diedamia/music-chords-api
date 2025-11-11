@@ -1,0 +1,168 @@
+openapi: 3.0.0
+info:
+  title: API Справочника аккордов и текстов песен
+  description: REST API для управления базой песен с аккордами и текстами
+  version: 1.0.0
+  contact:
+    name: Karapetyan Victoria
+servers:
+  - url: https://ваш-домен.railway.app
+    description: Production server
+paths:
+  /api/songs:
+    get:
+      summary: Получить список всех песен
+      description: Возвращает список песен с возможностью фильтрации
+      parameters:
+        - name: artist
+          in: query
+          description: Фильтр по исполнителю
+          schema:
+            type: string
+        - name: difficulty
+          in: query
+          description: Фильтр по сложности
+          schema:
+            type: string
+            enum: [beginner, intermediate, advanced]
+        - name: search
+          in: query
+          description: Поиск по названию, исполнителю или тексту
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Успешный ответ
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Song'
+    
+    post:
+      summary: Добавить новую песню
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SongInput'
+      responses:
+        '201':
+          description: Песня создана
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Song'
+  
+  /api/songs/{id}:
+    get:
+      summary: Получить песню по ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Успешный ответ
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Song'
+        '404':
+          description: Песня не найдена
+    
+    put:
+      summary: Обновить песню
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SongInput'
+      responses:
+        '200':
+          description: Песня обновлена
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Song'
+    
+    delete:
+      summary: Удалить песню
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Песня удалена
+        '404':
+          description: Песня не найдена
+
+components:
+  schemas:
+    Song:
+      type: object
+      properties:
+        _id:
+          type: string
+          description: Уникальный идентификатор песни
+        title:
+          type: string
+          description: Название песни
+        artist:
+          type: string
+          description: Исполнитель
+        lyrics:
+          type: string
+          description: Текст песни
+        chords:
+          type: string
+          description: Аккорды
+        difficulty:
+          type: string
+          enum: [beginner, intermediate, advanced]
+          description: Сложность аккордов
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    
+    SongInput:
+      type: object
+      required:
+        - title
+        - artist
+        - lyrics
+        - chords
+      properties:
+        title:
+          type: string
+          description: Название песни
+        artist:
+          type: string
+          description: Исполнитель
+        lyrics:
+          type: string
+          description: Текст песни
+        chords:
+          type: string
+          description: Аккорды
+        difficulty:
+          type: string
+          enum: [beginner, intermediate, advanced]
+          description: Сложность аккордов
